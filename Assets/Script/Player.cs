@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using DG.Tweening;
 
 public class Player : MonoBehaviour
 {
@@ -26,8 +25,8 @@ public class Player : MonoBehaviour
 
     private enum PlayerStatus { AlongYAxis, AlongXAxis, AlongZAxis }
 
-    private float xfactor = 1f;
-    private float yfactor = 1f;
+    private float xfactor;
+    private float yfactor;
     private bool isRotating;
     private float offset;
     private Vector3 moveAxis;
@@ -47,7 +46,6 @@ public class Player : MonoBehaviour
         // this has to be excecute after ini GameManager
         playerPos = new PlayerPos();
         Vector2 v2 = GameManager.Instance.GetCoordInMap(transform.position.x, transform.position.z);
-        Debug.Log(v2);
         playerPos.xidx2 = playerPos.xidx1 = (int)v2.x;
         playerPos.yidx2 = playerPos.yidx1 = (int)v2.y;
 
@@ -98,7 +96,6 @@ public class Player : MonoBehaviour
                         movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Up, playerPos.xidx1, playerPos.yidx1);
                         playerPos.xidx1 += 2;
                         playerPos.xidx2 += 1;
-                        Debug.LogFormat("xidx1: {0}, xidx2: {1}", playerPos.xidx1, playerPos.xidx2);
                         status = PlayerStatus.AlongXAxis;
                     }
                     else
@@ -113,8 +110,6 @@ public class Player : MonoBehaviour
                         movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Up, playerPos.xidx1, playerPos.yidx1);
                         playerPos.xidx1 += 1;
                         playerPos.xidx2 += 2;
-                        Debug.LogFormat("xidx1: {0}, xidx2: {1}", playerPos.xidx1, playerPos.xidx2);
-
                         status = PlayerStatus.AlongYAxis;
                     }
                     else

@@ -76,13 +76,8 @@
     <Reference Include="UnityEditor">
       <HintPath>Library\UnityAssemblies\UnityEditor.dll</HintPath>
     </Reference>
-    <Reference Include="DOTween">
-      <HintPath>Assets\Demigiant\DOTween\DOTween.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Demigiant\DOTween\Examples\Basics.cs" />
-    <Compile Include="Assets\Demigiant\DOTween\Examples\Sequences.cs" />
     <Compile Include="Assets\FarlandSkies\Demo\Scripts\Player\FPSWalkerEnhanced.cs" />
     <Compile Include="Assets\FarlandSkies\Demo\Scripts\Player\SmoothMouseLook.cs" />
     <Compile Include="Assets\FarlandSkies\Demo\Scripts\Skybox\SkyboxChanger.cs" />
@@ -90,14 +85,8 @@
     <Compile Include="Assets\Script\GameManager.cs" />
     <Compile Include="Assets\Script\InputManager.cs" />
     <Compile Include="Assets\Script\Player.cs" />
-    <Compile Include="Assets\Script\TestSize.cs" />
     <Compile Include="Assets\Test\TestCube.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Assets\Demigiant\DOTween\DOTween.XML" />
-    <None Include="Assets\Demigiant\DOTween\Editor\DOTweenEditor.XML" />
-    <None Include="Assets\Demigiant\DOTween\readme.txt" />
-    <None Include="Assets\Prototype Kit 1\Readme.txt" />
+    <Compile Include="Assets\Test\TestSize.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
