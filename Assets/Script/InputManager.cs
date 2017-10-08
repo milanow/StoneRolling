@@ -73,7 +73,7 @@ public class InputManager : MonoBehaviour {
     //    applicationIsQuitting = true;
     //}
 
-    public static event Action<InputDirections> OnMove;
+    public static event Action<InputDirections> OnMoveControl;
 
 	// Use this for initialization
 	void Start () {
@@ -84,19 +84,19 @@ public class InputManager : MonoBehaviour {
 	void Update () {
         if (Input.GetKeyDown(KeyCode.W))
         {
-            OnMove(InputDirections.Up);
+            OnMoveControl(InputDirections.Up);
         }
         else if (Input.GetKeyDown(KeyCode.S))
         {
-            OnMove(InputDirections.Down);
+            OnMoveControl(InputDirections.Down);
         }
         else if (Input.GetKeyDown(KeyCode.A))
         {
-            OnMove(InputDirections.Left);
+            OnMoveControl(InputDirections.Left);
         }
         else if (Input.GetKeyDown(KeyCode.D))
         {
-            OnMove(InputDirections.Right);
+            OnMoveControl(InputDirections.Right);
         }
     }
 
