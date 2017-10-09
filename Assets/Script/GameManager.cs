@@ -1,13 +1,18 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/* Author: Tianhe Wang
+ * Date: 10/09/2017
+ */
+
 using UnityEngine;
 using System;
 
 public class GameManager : MonoBehaviour {
 
+    // determine when to destory the instance
     private static bool applicationIsQuitting = false;
+    // prevent generating more instance
     private static object _lock = new object();
     private static GameManager _instance;
+    // public access to GameManager instance
     public static GameManager Instance
     {
         get
@@ -58,9 +63,16 @@ public class GameManager : MonoBehaviour {
 
         }
     }
+    // a parent object of all floors/cells in the game
     public GameObject Floor;
+    // the start and end position of a level
+    public Vector2 StartPosition;
+    public Vector2 EndPosition;
 
+    // map records if current coordinate has cell, the mao gives an overview of what the level is like
+    // since we have an irregular shape of map, but storing inside a 2D array, thus we need bool to outline the map
     bool[,] map;
+    // offsets are used to conversion between 'index of map' and 'world coordinate in Unity'
     int rowOffset;
     int colOffset;
 
@@ -96,6 +108,7 @@ public class GameManager : MonoBehaviour {
 #endif
     }
      
+    // calculate the length of 2D array that can hold the map
     private void CalBoundary(ref int row, ref int col)
     {
         int minRow = Int32.MaxValue;

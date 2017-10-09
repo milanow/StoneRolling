@@ -1,5 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/* Author: Tianhe Wang
+ * Date: 10/09/2017
+ */
+
 using UnityEngine;
 using System;
 

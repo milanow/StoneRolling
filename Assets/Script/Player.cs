@@ -1,5 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿/* Author: Tianhe Wang
+ * Date: 10/09/2017
+ */
+
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -65,6 +67,7 @@ public class Player : MonoBehaviour
     private void InitializePlayerPos()
     {
         playerPos = new PlayerPos();
+        transform.position = new Vector3(GameManager.Instance.StartPosition.x, 0, GameManager.Instance.StartPosition.y);
         Vector2 v2 = GameManager.Instance.GetCoordInMap(transform.position.x, transform.position.z);
         playerPos.xidx2 = playerPos.xidx1 = (int)v2.x;
         playerPos.yidx2 = playerPos.yidx1 = (int)v2.y;
