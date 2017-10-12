@@ -5,10 +5,11 @@
 using UnityEngine;
 using System;
 
-public class GameManager : MonoBehaviour {
+public class GameManager : MonoBehaviour
+{
 
     // determine when to destory the instance
-    private static bool applicationIsQuitting = false;
+    private static bool _applicationIsQuitting = false;
     // prevent generating more instance
     private static object _lock = new object();
     private static GameManager _instance;
@@ -17,7 +18,7 @@ public class GameManager : MonoBehaviour {
     {
         get
         {
-            if (applicationIsQuitting)
+            if (_applicationIsQuitting)
             {
                 Debug.LogWarning("[Singleton] Instance '" + "GameManager" +
                     "' already destroyed on application quit." +
@@ -65,21 +66,49 @@ public class GameManager : MonoBehaviour {
     }
     // a parent object of all floors/cells in the game
     public GameObject Floor;
+    public Player Player;
     // the start and end position of a level
-    public Vector2 StartPosition;
-    public Vector2 EndPosition;
+    public Transform StartCell;
+    public Transform EndCell;
+
+    /// <summary>
+    /// The index of destination in map
+    /// </summary>
+    public Vector2 EndCellCoordInMap
+    {
+        get
+        {
+            return GetCoordInMap(EndCell.position.x, EndCell.position.z);
+        }
+    }
+
+    /// <summary>
+    /// True if game is paused, false if game is running
+    /// </summary>
+    public bool PauseGame { get; set; }
+
+    /// <summary>
+    /// True if game is over, false if game is running
+    /// </summary>
+    public bool GameOver { get; set; }
+
+    /// <summary>
+    /// An event when game end fired
+    /// </summary>
+    public Action<GameManager> OnGameEnd;
+    private bool firedGameEnd = false;
 
     // map records if current coordinate has cell, the mao gives an overview of what the level is like
     // since we have an irregular shape of map, but storing inside a 2D array, thus we need bool to outline the map
-    bool[,] map;
+    bool[,] _map;
     // offsets are used to conversion between 'index of map' and 'world coordinate in Unity'
-    int rowOffset;
-    int colOffset;
+    int _rowOffset;
+    int _colOffset;
 
     private void Awake()
     {
         // syn cells to map
-        if(Floor == null)
+        if (Floor == null)
         {
             Floor = GameObject.Find("Floors");
             if (Floor == null)
@@ -89,25 +118,49 @@ public class GameManager : MonoBehaviour {
             }
         }
 
+        if(Player == null)
+        {
+            Player = GameObject.Find("Player").GetComponent<Player>();
+            if(Player == null)
+            {
+                Debug.LogError("No Player assigned!");
+                return;
+            }
+        }
+
         int lengthRow = 0, lengthCol = 0;
         CalBoundary(ref lengthRow, ref lengthCol);
-        if(lengthRow == 0 || lengthCol == 0)
+#if UNITY_EDITOR
+        if (lengthRow == 0 || lengthCol == 0)
         {
             Debug.Log("There is no floor in the scene.");
         }
-        map = new bool[lengthRow, lengthCol];
+#endif
+        _map = new bool[lengthRow, lengthCol];
 
         Transform[] cells = Floor.GetComponentsInChildren<Transform>();
-        for(int i = 0; i < cells.Length; ++i)
+        for (int i = 0; i < cells.Length; ++i)
         {
-            map[(int)(cells[i].position.x) + rowOffset, (int)(cells[i].position.z) + colOffset] = true;
+            _map[(int)(cells[i].position.x) + _rowOffset, (int)(cells[i].position.z) + _colOffset] = true;
         }
+
+        PauseGame = false;
 
 #if UNITY_EDITOR
         Debug.Log("map initialize succeeds!");
 #endif
     }
-     
+
+    private void Update()
+    {
+        // Check if player has reach the destination
+        if (GameOver && !firedGameEnd)
+        {
+            OnGameEnd(this);
+            firedGameEnd = true;
+        }
+    }
+
     // calculate the length of 2D array that can hold the map
     private void CalBoundary(ref int row, ref int col)
     {
@@ -127,25 +180,37 @@ public class GameManager : MonoBehaviour {
 
         row = maxRow - minRow + 1;
         col = maxCol - minCol + 1;
-        rowOffset = 0 - minRow;
-        colOffset = 0 - minCol;
+        _rowOffset = 0 - minRow;
+        _colOffset = 0 - minCol;
 
 #if UNITY_EDITOR
         Debug.Log("Map size: " + row + ", " + col);
-        Debug.Log("Row offset: " + rowOffset);
-        Debug.Log("Col offset: " + colOffset);
+        Debug.Log("Row offset: " + _rowOffset);
+        Debug.Log("Col offset: " + _colOffset);
 #endif
     }
 
-    public Vector2 GetCoordInMap(float xcoord, float ycoord)
+    /// <summary>
+    /// Transform world position to map index
+    /// </summary>
+    /// <param name="x"> x in world space coord </param>
+    /// <param name="y"> y in world space coord </param>
+    /// <returns></returns>
+    public Vector2 GetCoordInMap(float x, float y)
     {
-        return new Vector2(Mathf.RoundToInt(xcoord) + rowOffset, Mathf.RoundToInt(ycoord) + colOffset);
+        return new Vector2(Mathf.RoundToInt(x) + _rowOffset, Mathf.RoundToInt(y) + _colOffset);
     }
 
-    //public Vector2 GetCoordInWorldAxis(float xcoord, float ycoord)
-    //{
-    //    return new Vector2(xcoord - rowOffset, ycoord - colOffset);
-    //}
+    /// <summary>
+    /// Transform map position to world postion
+    /// </summary>
+    /// <param name="x"> x index in map </param>
+    /// <param name="y"> y index in map </param>
+    /// <returns></returns>
+    public Vector2 GetCoordInWorldAxis(float x, float y)
+    {
+        return new Vector2(x - _rowOffset, y - _colOffset);
+    }
 
     /// <summary>
     /// Check if next move is valid, inputs are target positions
@@ -155,16 +220,16 @@ public class GameManager : MonoBehaviour {
     /// <param name="x2"> Second point's x index </param>
     /// <param name="y2"> Second point's y index </param>
     /// <returns></returns>
-    public bool ValidMove(int x1, int y1, int x2 = -2, int y2 = -2)
+    public bool ValidMove(float x1, float y1, float x2 = -2f, float y2 = -2f)
     {
         // first point
-        if (x1 < 0 || y1 < 0 || x1 >= map.GetLength(0) || y1 >= map.GetLength(1) || !map[x1, y1]) return false;
+        if (x1 < 0 || y1 < 0 || x1 >= _map.GetLength(0) || y1 >= _map.GetLength(1) || !_map[(int)x1, (int)y1]) return false;
 
         // if new pos is 'standing'
         if (x2 == -2 && y2 == -2) return true;
 
         // second point
-        if (x2 < 0 || y2 < 0 || x2 >= map.GetLength(0) || y2 >= map.GetLength(1) || !map[x2, y2]) return false;
+        if (x2 < 0 || y2 < 0 || x2 >= _map.GetLength(0) || y2 >= _map.GetLength(1) || !_map[(int)x2, (int)y2]) return false;
 
         // both points are valid
         return true;
@@ -177,33 +242,33 @@ public class GameManager : MonoBehaviour {
     /// <param name="row"> The x coord of the player </param>
     /// <param name="col"> The y coord of the player </param>
     /// <returns></returns>
-    public Vector3 GetRotatingPoint(InputDirections dir, int row, int col)
+    public Vector3 GetRotatingPoint(InputDirections dir, float row, float col)
     {
         Vector3 res;
-        if(dir == InputDirections.Up)
+        if (dir == InputDirections.Up)
         {
-            res = new Vector3(row - rowOffset + .5f, 0, col - colOffset);
+            res = new Vector3(row - _rowOffset + .5f, 0, col - _colOffset);
         }
-        else if(dir == InputDirections.Down)
+        else if (dir == InputDirections.Down)
         {
-            res = new Vector3(row - rowOffset - .5f, 0, col - colOffset);
+            res = new Vector3(row - _rowOffset - .5f, 0, col - _colOffset);
         }
-        else if(dir == InputDirections.Left)
+        else if (dir == InputDirections.Left)
         {
-            res = new Vector3(row - rowOffset, 0, col - colOffset + .5f);
+            res = new Vector3(row - _rowOffset, 0, col - _colOffset + .5f);
         }
         else
         {
-            res = new Vector3(row - rowOffset, 0, col - colOffset - .5f);
+            res = new Vector3(row - _rowOffset, 0, col - _colOffset - .5f);
         }
         return res;
     }
 
     public void OnDestroy()
     {
-        applicationIsQuitting = true;
+        _applicationIsQuitting = true;
     }
 
-    
+
 
 }

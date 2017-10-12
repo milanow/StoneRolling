@@ -15,7 +15,7 @@ public enum InputDirections
 
 public class InputManager : MonoBehaviour {
 
-    public GameObject player;
+    public GameObject Player;
 
     //private static bool applicationIsQuitting = false;
     //private static object _lock = new object();
@@ -76,29 +76,27 @@ public class InputManager : MonoBehaviour {
     //}
 
     public static event Action<InputDirections> OnMoveControl;
-
-	// Use this for initialization
-	void Start () {
-	    	
-	}
 	
 	// Update is called once per frame
 	void Update () {
-        if (Input.GetKeyDown(KeyCode.W))
+        if (!GameManager.Instance.GameOver)
         {
-            OnMoveControl(InputDirections.Up);
-        }
-        else if (Input.GetKeyDown(KeyCode.S))
-        {
-            OnMoveControl(InputDirections.Down);
-        }
-        else if (Input.GetKeyDown(KeyCode.A))
-        {
-            OnMoveControl(InputDirections.Left);
-        }
-        else if (Input.GetKeyDown(KeyCode.D))
-        {
-            OnMoveControl(InputDirections.Right);
+            if (Input.GetKeyDown(KeyCode.W))
+            {
+                OnMoveControl(InputDirections.Up);
+            }
+            else if (Input.GetKeyDown(KeyCode.S))
+            {
+                OnMoveControl(InputDirections.Down);
+            }
+            else if (Input.GetKeyDown(KeyCode.A))
+            {
+                OnMoveControl(InputDirections.Left);
+            }
+            else if (Input.GetKeyDown(KeyCode.D))
+            {
+                OnMoveControl(InputDirections.Right);
+            }
         }
     }
 

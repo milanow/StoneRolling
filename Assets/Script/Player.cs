@@ -8,11 +8,11 @@ public class Player : MonoBehaviour
 {
     private struct PlayerPos
     {
-        public int xidx1;
-        public int yidx1;
-        public int xidx2;
-        public int yidx2;
-        public PlayerPos(int x1, int y1, int x2, int y2)
+        public float xidx1;
+        public float yidx1;
+        public float xidx2;
+        public float yidx2;
+        public PlayerPos(float x1, float y1, float x2, float y2)
         {
             xidx1 = x1;
             yidx1 = y1;
@@ -23,30 +23,43 @@ public class Player : MonoBehaviour
     }
     private enum PlayerStatus { AlongYAxis, AlongXAxis, AlongZAxis }
 
-    // playuer's move speed
+    /// <summary>
+    /// playuer's move speed
+    /// </summary>
     public float RotatingSpeed = 20f;
     // these two factors are for translating object's scale to world's scale
-    private float xfactor;
-    private float yfactor;
+    private float _xfactor;
+    private float _yfactor;
     // whether player is moving/rotating, if true, then disable input
-    private bool isRotating;
-    private float offset;
+    private bool _isRotating;
+    private float _offset;
     // these two variables reresent the instruction to rotate/move the player 
-    private Vector3 moveAxis;
-    private Vector3 movePoint;
+    private Vector3 _moveAxis;
+    private Vector3 _movePoint;
     // player has 3 different status, stand along x, y or z axis
-    private PlayerStatus status;
+    private PlayerStatus _status;
     // idx1 & idx2 does not may switch role when player is moving, xidx1 always larger than xidx2, yidx1 always larger thatn yidx2
-    private PlayerPos playerPos;
+    private PlayerPos _playerPos;
+    /// <summary>
+    /// return the center of player object
+    /// </summary>
+    public Vector2 PlayerCenter
+    {
+        get
+        {
+            return GameManager.Instance.GetCoordInWorldAxis((_playerPos.xidx1 + _playerPos.xidx2) / 2f, (_playerPos.yidx1 + _playerPos.yidx2) / 2f);
+        }
+    }
+
 
     // Use this for initialization
     void Start()
     {
-        isRotating = false;
-        status = 0;
-        offset = 0;
-        moveAxis = new Vector3(0, 0, 0);
-        movePoint = new Vector3(0, 0, 0);
+        _isRotating = false;
+        _status = 0;
+        _offset = 0;
+        _moveAxis = new Vector3(0, 0, 0);
+        _movePoint = new Vector3(0, 0, 0);
 
         // this has to be excecute after ini GameManager
         InitializePlayerPos();
@@ -59,37 +72,48 @@ public class Player : MonoBehaviour
 
     private void CalculatePlayerScale()
     {
-        xfactor = this.GetComponent<Renderer>().bounds.size.x;
-        yfactor = this.GetComponent<Renderer>().bounds.size.y;
-        this.transform.localScale = new Vector3(1f / xfactor, 2f / yfactor, 1f / xfactor);
+        _xfactor = this.GetComponent<Renderer>().bounds.size.x;
+        _yfactor = this.GetComponent<Renderer>().bounds.size.y;
+        this.transform.localScale = new Vector3(1f / _xfactor, 2f / _yfactor, 1f / _xfactor);
     }
 
     private void InitializePlayerPos()
     {
-        playerPos = new PlayerPos();
-        transform.position = new Vector3(GameManager.Instance.StartPosition.x, 0, GameManager.Instance.StartPosition.y);
+        _playerPos = new PlayerPos();
+        transform.position = new Vector3(GameManager.Instance.StartCell.position.x, 0, GameManager.Instance.StartCell.position.y);
         Vector2 v2 = GameManager.Instance.GetCoordInMap(transform.position.x, transform.position.z);
-        playerPos.xidx2 = playerPos.xidx1 = (int)v2.x;
-        playerPos.yidx2 = playerPos.yidx1 = (int)v2.y;
+        _playerPos.xidx2 = _playerPos.xidx1 = (int)v2.x;
+        _playerPos.yidx2 = _playerPos.yidx1 = (int)v2.y;
     }
 
     void FixedUpdate()
     {
-        if (isRotating)
+        if (_isRotating)
         {
-            offset += 90 * Time.deltaTime * 0.1f * RotatingSpeed;
-            transform.RotateAround(movePoint, moveAxis, 90f * Time.fixedDeltaTime * 0.1f * RotatingSpeed);
+            _offset += 90 * Time.deltaTime * 0.1f * RotatingSpeed;
+            transform.RotateAround(_movePoint, _moveAxis, 90f * Time.fixedDeltaTime * 0.1f * RotatingSpeed);
 
-            if (offset >= 90)
+            if (_offset >= 90)
             {
-                isRotating = false;
-                offset = 0;
+                _isRotating = false;
+                _offset = 0;
 
                 // correct rotation
                 transform.localRotation = Quaternion.Euler(Mathf.RoundToInt(transform.eulerAngles.x / 90.0f) * 90, Mathf.RoundToInt((transform.eulerAngles.y) / 90.0f) * 90, Mathf.RoundToInt((transform.eulerAngles.z) / 90.0f) * 90);
                 // correct location
                 Vector3 oldPos = transform.position;
                 transform.position = new Vector3(Mathf.Round(2 * oldPos.x) / 2, Mathf.Round(2 * oldPos.y) / 2, Mathf.Round(2 * oldPos.z) / 2);
+
+                // check if game is over
+                if (_status == PlayerStatus.AlongYAxis)
+                {
+                    Vector2 endPos = GameManager.Instance.EndCellCoordInMap;
+                    if(_playerPos.xidx1 == endPos.x && _playerPos.yidx1 == endPos.y)
+                    {
+                        GameManager.Instance.GameOver = true;
+                    }
+                }
+                
             }
         }
     }
@@ -105,22 +129,22 @@ public class Player : MonoBehaviour
     void PrepareRotate(InputDirections dir)
     {
         // if rotating then not need to change direction
-        if (isRotating) return;
+        if (_isRotating) return;
 
         // different input & status make different moveAxis & movePoint, these two variables are for correctly rotating/moving 
         // the 'player box', which is required by 'transform.RotateAround()' method. Besides, updating player's position and status
         if (dir == InputDirections.Up)
         {
-            moveAxis = Vector3.back;
-            switch (status)
+            _moveAxis = Vector3.back;
+            switch (_status)
             {
                 case PlayerStatus.AlongYAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1 + 2, playerPos.yidx1, playerPos.xidx2 + 1, playerPos.yidx2))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1 + 2, _playerPos.yidx1, _playerPos.xidx2 + 1, _playerPos.yidx2))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Up, playerPos.xidx1, playerPos.yidx1);
-                        playerPos.xidx1 += 2;
-                        playerPos.xidx2 += 1;
-                        status = PlayerStatus.AlongXAxis;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Up, _playerPos.xidx1, _playerPos.yidx1);
+                        _playerPos.xidx1 += 2;
+                        _playerPos.xidx2 += 1;
+                        _status = PlayerStatus.AlongXAxis;
                     }
                     else
                     {
@@ -130,12 +154,12 @@ public class Player : MonoBehaviour
                     }
                     break;
                 case PlayerStatus.AlongXAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1 + 1, playerPos.yidx1))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1 + 1, _playerPos.yidx1))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Up, Mathf.Max(playerPos.xidx1, playerPos.xidx2), playerPos.yidx1);
-                        playerPos.xidx1 += 1;
-                        playerPos.xidx2 += 2;
-                        status = PlayerStatus.AlongYAxis;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Up, Mathf.Max(_playerPos.xidx1, _playerPos.xidx2), _playerPos.yidx1);
+                        _playerPos.xidx1 += 1;
+                        _playerPos.xidx2 += 2;
+                        _status = PlayerStatus.AlongYAxis;
                     }
                     else
                     {
@@ -144,11 +168,11 @@ public class Player : MonoBehaviour
                     }
                     break;
                 case PlayerStatus.AlongZAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1 + 1, playerPos.yidx1, playerPos.xidx2 + 1, playerPos.yidx2))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1 + 1, _playerPos.yidx1, _playerPos.xidx2 + 1, _playerPos.yidx2))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Up, playerPos.xidx1, playerPos.yidx1);
-                        playerPos.xidx1 += 1;
-                        playerPos.xidx2 += 1;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Up, _playerPos.xidx1, _playerPos.yidx1);
+                        _playerPos.xidx1 += 1;
+                        _playerPos.xidx2 += 1;
                     }
                     else
                     {
@@ -163,16 +187,16 @@ public class Player : MonoBehaviour
         }
         else if (dir == InputDirections.Down)
         {
-            moveAxis = Vector3.forward;
-            switch (status)
+            _moveAxis = Vector3.forward;
+            switch (_status)
             {
                 case PlayerStatus.AlongYAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1 - 1, playerPos.yidx1, playerPos.xidx2 - 2, playerPos.yidx2))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1 - 1, _playerPos.yidx1, _playerPos.xidx2 - 2, _playerPos.yidx2))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Down, playerPos.xidx1, playerPos.yidx1);
-                        playerPos.xidx1 -= 1;
-                        playerPos.xidx2 -= 2;
-                        status = PlayerStatus.AlongXAxis;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Down, _playerPos.xidx1, _playerPos.yidx1);
+                        _playerPos.xidx1 -= 1;
+                        _playerPos.xidx2 -= 2;
+                        _status = PlayerStatus.AlongXAxis;
                     }
                     else
                     {
@@ -181,12 +205,12 @@ public class Player : MonoBehaviour
                     }
                     break;
                 case PlayerStatus.AlongXAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1 - 2, playerPos.yidx1))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1 - 2, _playerPos.yidx1))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Down, Mathf.Min(playerPos.xidx1, playerPos.xidx2), playerPos.yidx1);
-                        playerPos.xidx1 -= 2;
-                        playerPos.xidx2 -= 1;
-                        status = PlayerStatus.AlongYAxis;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Down, Mathf.Min(_playerPos.xidx1, _playerPos.xidx2), _playerPos.yidx1);
+                        _playerPos.xidx1 -= 2;
+                        _playerPos.xidx2 -= 1;
+                        _status = PlayerStatus.AlongYAxis;
                     }
                     else
                     {
@@ -195,11 +219,11 @@ public class Player : MonoBehaviour
                     }
                     break;
                 case PlayerStatus.AlongZAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1 - 1, playerPos.yidx1, playerPos.xidx2 - 1, playerPos.yidx2))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1 - 1, _playerPos.yidx1, _playerPos.xidx2 - 1, _playerPos.yidx2))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Down, playerPos.xidx1, playerPos.yidx1);
-                        playerPos.xidx1 -= 1;
-                        playerPos.xidx2 -= 1;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Down, _playerPos.xidx1, _playerPos.yidx1);
+                        _playerPos.xidx1 -= 1;
+                        _playerPos.xidx2 -= 1;
                     }
                     else
                     {
@@ -214,16 +238,16 @@ public class Player : MonoBehaviour
         }
         else if (dir == InputDirections.Left)
         {
-            moveAxis = Vector3.right;
-            switch (status)
+            _moveAxis = Vector3.right;
+            switch (_status)
             {
                 case PlayerStatus.AlongYAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1, playerPos.yidx1 + 2, playerPos.xidx2, playerPos.yidx2 + 1))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1, _playerPos.yidx1 + 2, _playerPos.xidx2, _playerPos.yidx2 + 1))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Left, playerPos.xidx1, playerPos.yidx1);
-                        playerPos.yidx1 += 2;
-                        playerPos.yidx2 += 1;
-                        status = PlayerStatus.AlongZAxis;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Left, _playerPos.xidx1, _playerPos.yidx1);
+                        _playerPos.yidx1 += 2;
+                        _playerPos.yidx2 += 1;
+                        _status = PlayerStatus.AlongZAxis;
                     }
                     else
                     {
@@ -232,11 +256,11 @@ public class Player : MonoBehaviour
                     }
                     break;
                 case PlayerStatus.AlongXAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1, playerPos.yidx1 + 1, playerPos.xidx2, playerPos.yidx2 + 1))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1, _playerPos.yidx1 + 1, _playerPos.xidx2, _playerPos.yidx2 + 1))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Left, playerPos.xidx1, playerPos.yidx1);
-                        playerPos.yidx1 += 1;
-                        playerPos.yidx2 += 1;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Left, _playerPos.xidx1, _playerPos.yidx1);
+                        _playerPos.yidx1 += 1;
+                        _playerPos.yidx2 += 1;
                     }
                     else
                     {
@@ -245,12 +269,12 @@ public class Player : MonoBehaviour
                     }
                     break;
                 case PlayerStatus.AlongZAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1, playerPos.yidx1 + 1))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1, _playerPos.yidx1 + 1))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Left, playerPos.xidx1, Mathf.Max(playerPos.yidx1, playerPos.yidx2));
-                        playerPos.yidx1 += 1;
-                        playerPos.yidx2 += 2;
-                        status = PlayerStatus.AlongYAxis;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Left, _playerPos.xidx1, Mathf.Max(_playerPos.yidx1, _playerPos.yidx2));
+                        _playerPos.yidx1 += 1;
+                        _playerPos.yidx2 += 2;
+                        _status = PlayerStatus.AlongYAxis;
                     }
                     else
                     {
@@ -265,16 +289,16 @@ public class Player : MonoBehaviour
         }
         else
         {
-            moveAxis = Vector3.left;
-            switch (status)
+            _moveAxis = Vector3.left;
+            switch (_status)
             {
                 case PlayerStatus.AlongYAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1, playerPos.yidx1 - 1, playerPos.xidx2, playerPos.yidx2 - 2))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1, _playerPos.yidx1 - 1, _playerPos.xidx2, _playerPos.yidx2 - 2))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Right, playerPos.xidx1, playerPos.yidx1);
-                        playerPos.yidx1 -= 1;
-                        playerPos.yidx2 -= 2;
-                        status = PlayerStatus.AlongZAxis;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Right, _playerPos.xidx1, _playerPos.yidx1);
+                        _playerPos.yidx1 -= 1;
+                        _playerPos.yidx2 -= 2;
+                        _status = PlayerStatus.AlongZAxis;
                     }
                     else
                     {
@@ -283,11 +307,11 @@ public class Player : MonoBehaviour
                     }
                     break;
                 case PlayerStatus.AlongXAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1, playerPos.yidx1 - 1, playerPos.xidx2, playerPos.yidx2 - 1))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1, _playerPos.yidx1 - 1, _playerPos.xidx2, _playerPos.yidx2 - 1))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Right, playerPos.xidx1, playerPos.yidx1);
-                        playerPos.yidx1 -= 1;
-                        playerPos.yidx2 -= 1;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Right, _playerPos.xidx1, _playerPos.yidx1);
+                        _playerPos.yidx1 -= 1;
+                        _playerPos.yidx2 -= 1;
                     }
                     else
                     {
@@ -296,12 +320,12 @@ public class Player : MonoBehaviour
                     }
                     break;
                 case PlayerStatus.AlongZAxis:
-                    if (GameManager.Instance.ValidMove(playerPos.xidx1, playerPos.yidx1 - 2))
+                    if (GameManager.Instance.ValidMove(_playerPos.xidx1, _playerPos.yidx1 - 2))
                     {
-                        movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Right, playerPos.xidx2, Mathf.Min(playerPos.yidx1, playerPos.yidx2));
-                        playerPos.yidx1 -= 2;
-                        playerPos.yidx2 -= 1;
-                        status = PlayerStatus.AlongYAxis;
+                        _movePoint = GameManager.Instance.GetRotatingPoint(InputDirections.Right, _playerPos.xidx2, Mathf.Min(_playerPos.yidx1, _playerPos.yidx2));
+                        _playerPos.yidx1 -= 2;
+                        _playerPos.yidx2 -= 1;
+                        _status = PlayerStatus.AlongYAxis;
                     }
                     else
                     {
@@ -315,7 +339,7 @@ public class Player : MonoBehaviour
             }
         }
         // TODO: play move's sound
-        isRotating = true;
+        _isRotating = true;
         //Debug.LogFormat("idx1: {0}, idy1: {1}, idx2: {2}, idy2: {3}", playerPos.xidx1, playerPos.yidx1, playerPos.xidx2, playerPos.yidx2);
     }
 
