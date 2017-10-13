@@ -43,7 +43,7 @@ MonoBehaviour:
     y: 0
     width: 1920
     height: 997
-  m_MinSize: {x: 950, y: 300}
+  m_MinSize: {x: 950, y: 542}
   m_MaxSize: {x: 10000, y: 10000}
 --- !u!114 &3
 MonoBehaviour:
@@ -200,7 +200,7 @@ MonoBehaviour:
     serializedVersion: 2
     x: 259
     y: 0
-    width: 605
+    width: 900
     height: 671
   m_MinSize: {x: 204, y: 221}
   m_MaxSize: {x: 4004, y: 4021}
@@ -224,9 +224,9 @@ MonoBehaviour:
   m_Children: []
   m_Position:
     serializedVersion: 2
-    x: 864
+    x: 1159
     y: 0
-    width: 669
+    width: 374
     height: 671
   m_MinSize: {x: 104, y: 121}
   m_MaxSize: {x: 4004, y: 4021}
@@ -258,7 +258,7 @@ MonoBehaviour:
   m_MinSize: {x: 336, y: 271}
   m_MaxSize: {x: 14006, y: 10021}
   vertical: 0
-  controlID: 111
+  controlID: 147
 --- !u!114 &12
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -357,20 +357,20 @@ MonoBehaviour:
   m_DepthBufferBits: 0
   m_Pos:
     serializedVersion: 2
-    x: 866
+    x: 1161
     y: 92
-    width: 665
+    width: 370
     height: 650
   m_MaximizeOnPlay: 0
   m_Gizmos: 0
   m_Stats: 0
-  m_SelectedSizes: 00000000000000000000000000000000000000000000000000000000000000000000000000000000
+  m_SelectedSizes: 07000000000000000000000000000000000000000000000000000000000000000000000000000000
   m_TargetDisplay: 0
   m_ZoomArea:
     m_HRangeLocked: 0
     m_VRangeLocked: 0
-    m_HBaseRangeMin: -332.5
-    m_HBaseRangeMax: 332.5
+    m_HBaseRangeMin: -178.03125
+    m_HBaseRangeMax: 178.03125
     m_VBaseRangeMin: -316.5
     m_VBaseRangeMax: 316.5
     m_HAllowExceedBaseRangeMin: 1
@@ -378,8 +378,8 @@ MonoBehaviour:
     m_VAllowExceedBaseRangeMin: 1
     m_VAllowExceedBaseRangeMax: 1
     m_ScaleWithWindow: 0
-    m_HSlider: 1
-    m_VSlider: 1
+    m_HSlider: 0
+    m_VSlider: 0
     m_IgnoreScrollWheelUntilClicked: 0
     m_EnableMouseInput: 1
     m_EnableSliderZoom: 0
@@ -389,25 +389,25 @@ MonoBehaviour:
       serializedVersion: 2
       x: 0
       y: 17
-      width: 665
+      width: 370
       height: 633
-    m_Scale: {x: 1.0897791, y: 1.0897791}
-    m_Translation: {x: 319.8544, y: 300.38412}
+    m_Scale: {x: 1, y: 1}
+    m_Translation: {x: 185, y: 316.5}
     m_MarginLeft: 0
     m_MarginRight: 0
     m_MarginTop: 0
     m_MarginBottom: 0
     m_LastShownAreaInsideMargins:
       serializedVersion: 2
-      x: -293.50388
-      y: -275.6376
-      width: 610.2154
-      height: 580.8516
+      x: -185
+      y: -316.5
+      width: 370
+      height: 633
     m_MinimalGUI: 1
   m_defaultScale: 1
   m_TargetTexture: {fileID: 0}
   m_CurrentColorSpace: 0
-  m_LastWindowPixelSize: {x: 665, y: 650}
+  m_LastWindowPixelSize: {x: 370, y: 650}
   m_ClearInEditMode: 1
   m_NoCameraWarning: 1
   m_LowResolutionForAspectRatios: 01000000000100000100
@@ -488,17 +488,17 @@ MonoBehaviour:
     serializedVersion: 2
     x: 261
     y: 92
-    width: 601
+    width: 896
     height: 650
   m_SceneLighting: 1
-  lastFramingTime: 681.4899643899355
+  lastFramingTime: 579.3823281286806
   m_2DMode: 0
   m_isRotationLocked: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 4.3355446, y: -8.096395, z: -12.366101}
+    m_Target: {x: 87.51936, y: 298.5477, z: 8.592624}
     speed: 2
-    m_Value: {x: 4.3355446, y: -8.096395, z: -12.366101}
+    m_Value: {x: 87.51936, y: 298.5477, z: 8.592624}
   m_RenderMode: 0
   m_ValidateTrueMetals: 0
   m_SceneViewState:
@@ -521,13 +521,13 @@ MonoBehaviour:
       speed: 2
       m_Value: 0
   m_Rotation:
-    m_Target: {x: 0.12696126, y: 0.8729705, z: -0.32743743, w: 0.33850873}
+    m_Target: {x: 0.10871688, y: 0.8886439, z: -0.2766873, w: 0.3491945}
     speed: 2
-    m_Value: {x: 0.12696126, y: 0.8729706, z: -0.32743743, w: 0.33850873}
+    m_Value: {x: 0.10871688, y: 0.8886439, z: -0.2766873, w: 0.3491945}
   m_Size:
-    m_Target: 21.29792
+    m_Target: 103.83864
     speed: 2
-    m_Value: 21.29792
+    m_Value: 103.83864
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -601,19 +601,19 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets
+    - Assets/Source/UI
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/BasicButtonsPackage
+  - Assets/Source/UI
   m_LastFoldersGridSize: -1
   m_LastProjectPath: D:\Work\Unity3D\RollingStone
   m_IsLocked: 0
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: e0240000
-    m_LastClickedID: 9440
-    m_ExpandedIDs: 00000000e02400001e290000502d0000a6310000a8310000aa310000ac310000ae31000000ca9a3bffffff7f
+    scrollPos: {x: 0, y: 34}
+    m_SelectedIDs: 40250000
+    m_LastClickedID: 9536
+    m_ExpandedIDs: 00000000e2240000302500006e250000882800008a2800008c2800008e280000902800009228000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -641,7 +641,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 00000000e0240000842500005a2700001e290000502d0000a6310000a8310000aa310000ac310000ae310000
+    m_ExpandedIDs: 00000000e2240000302500006e250000882800008a2800008c2800008e2800009028000092280000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
