@@ -80,11 +80,15 @@
   <ItemGroup>
     <Compile Include="Assets\Script\CameraScript.cs" />
     <Compile Include="Assets\Script\GameManager.cs" />
+    <Compile Include="Assets\Script\GameStartPanelScript.cs" />
     <Compile Include="Assets\Script\InputManager.cs" />
     <Compile Include="Assets\Script\Player.cs" />
     <Compile Include="Assets\Script\UIManager.cs" />
     <Compile Include="Assets\Test\TestCube.cs" />
     <Compile Include="Assets\Test\TestSize.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Music\JDB - Adventure Music Pack\Thank you.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

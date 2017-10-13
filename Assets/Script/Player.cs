@@ -55,6 +55,13 @@ public class Player : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        //InitPlayer();
+        // Register Rotate function to subscribe input event
+        InputManager.OnMoveControl += OnPlayerMove;
+    }
+
+    public void InitPlayer()
+    {
         _isRotating = false;
         _status = 0;
         _offset = 0;
@@ -62,12 +69,21 @@ public class Player : MonoBehaviour
         _movePoint = new Vector3(0, 0, 0);
 
         // this has to be excecute after ini GameManager
-        InitializePlayerPos();
+        InitializePlayerPosAndRot();
 
         CalculatePlayerScale();
+    }
 
-        // Register Rotate function to subscribe input event
-        InputManager.OnMoveControl += OnPlayerMove;
+    public void ResetPlayer()
+    {
+        _isRotating = false;
+        _status = 0;
+        _offset = 0;
+        _moveAxis = new Vector3(0, 0, 0);
+        _movePoint = new Vector3(0, 0, 0);
+
+        InitializePlayerPosAndRot();
+
     }
 
     private void CalculatePlayerScale()
@@ -77,13 +93,14 @@ public class Player : MonoBehaviour
         this.transform.localScale = new Vector3(1f / _xfactor, 2f / _yfactor, 1f / _xfactor);
     }
 
-    private void InitializePlayerPos()
+    private void InitializePlayerPosAndRot()
     {
         _playerPos = new PlayerPos();
         transform.position = new Vector3(GameManager.Instance.StartCell.position.x, 0, GameManager.Instance.StartCell.position.y);
         Vector2 v2 = GameManager.Instance.GetCoordInMap(transform.position.x, transform.position.z);
         _playerPos.xidx2 = _playerPos.xidx1 = (int)v2.x;
         _playerPos.yidx2 = _playerPos.yidx1 = (int)v2.y;
+        transform.rotation = Quaternion.identity;
     }
 
     void FixedUpdate()

@@ -96,7 +96,7 @@ public class GameManager : MonoBehaviour
     /// An event when game end fired
     /// </summary>
     public Action<GameManager> OnGameEnd;
-    private bool firedGameEnd = false;
+    private bool firedGameEnd;
 
     // map records if current coordinate has cell, the mao gives an overview of what the level is like
     // since we have an irregular shape of map, but storing inside a 2D array, thus we need bool to outline the map
@@ -106,6 +106,12 @@ public class GameManager : MonoBehaviour
     int _colOffset;
 
     private void Awake()
+    {
+        GameInitialize();
+        Player.InitPlayer();
+    }
+
+    private void GameInitialize()
     {
         // syn cells to map
         if (Floor == null)
@@ -118,10 +124,10 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        if(Player == null)
+        if (Player == null)
         {
             Player = GameObject.Find("Player").GetComponent<Player>();
-            if(Player == null)
+            if (Player == null)
             {
                 Debug.LogError("No Player assigned!");
                 return;
@@ -144,7 +150,9 @@ public class GameManager : MonoBehaviour
             _map[(int)(cells[i].position.x) + _rowOffset, (int)(cells[i].position.z) + _colOffset] = true;
         }
 
-        PauseGame = false;
+        PauseGame = true;
+        GameOver = false;
+        firedGameEnd = false;
 
 #if UNITY_EDITOR
         Debug.Log("map initialize succeeds!");
@@ -159,6 +167,12 @@ public class GameManager : MonoBehaviour
             OnGameEnd(this);
             firedGameEnd = true;
         }
+    }
+
+    public void ResetGame()
+    {
+        GameInitialize();
+        Player.ResetPlayer();
     }
 
     // calculate the length of 2D array that can hold the map

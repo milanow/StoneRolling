@@ -79,7 +79,7 @@ public class InputManager : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (!GameManager.Instance.GameOver)
+        if (!GameManager.Instance.GameOver && !GameManager.Instance.PauseGame)
         {
             if (Input.GetKeyDown(KeyCode.W))
             {
